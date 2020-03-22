@@ -82,19 +82,24 @@ def trian():
         threads = tf.train.start_queue_runners(sess=sess, coord=coord)
         # 进行训练
         start_time = time.time()
-        for i in range(200):
+        pre_accuracy = 0.0
+        for i in range(20000):
             # 取训练数据
             b_image, b_lable = sess.run([image_batch, lable_batch])
             # 训练数据
             train_step.run(feed_dict={x_image: b_image, y_: b_lable})
-            # 每迭代2个batch,对当前训练数据进行测试，输出当前预测准确率
-            if i % 2 == 0:
+            # 每迭代10个batch,对当前训练数据进行测试，输出当前预测准确率
+            if i % 10 == 0:
                 train_accuracy = accuracy.eval(feed_dict={x_image: b_image, y_: b_lable})
                 print("step %d, training accuracy %g" % (i, train_accuracy))
                 # 计算间隔时间
                 end_time = time.time()
                 print('time:', (end_time - start_time))
                 start_time = end_time
+            # if i % 30 == 0:
+            #     print(train_accuracy,pre_accuracy)
+            #     print(train_accuracy<pre_accuracy+0.001)
+            #     pre_accuracy = train_accuracy
         saver = tf.train.Saver()
         saver.save(sess, sava_molel)
         b_image_test, b_lable_test = sess.run([image_batch_test, lable_batch_test])
