@@ -1,0 +1,2 @@
+model_checkpoint_path: "first_ground_model.ckpt"
+all_model_checkpoint_paths: "first_ground_model.ckpt"
