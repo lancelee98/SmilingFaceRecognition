@@ -43,9 +43,9 @@ h_conv3 = tf.nn.sigmoid(conv3 + bias3)
 # 即将学到的“分布式特征表示”映射 到样本标记空间的作用
 
 # 权值参数
-W_fc1 = tf.Variable(tf.truncated_normal([5 * 5 * 120, 80]))
+W_fc1 = tf.Variable(tf.truncated_normal([5 * 5 * 120, 60]))
 # 偏置值
-b_fc1 = tf.Variable(tf.truncated_normal([80]))
+b_fc1 = tf.Variable(tf.truncated_normal([60]))
 # 将卷积的输出展开
 h_pool2_flat = tf.reshape(h_conv3, [-1, 5 * 5 * 120])
 # 神经网络计算，并添加sigmoid激活函数
@@ -53,7 +53,7 @@ h_fc1 = tf.nn.sigmoid(tf.matmul(h_pool2_flat, W_fc1) + b_fc1)
 
 # 输出层，使用softmax进行多分类
 # 这里对池化后的数据进行重新展开，将二维数据重新展开成一维数组之后计算每一行的元素个数。最后一个输出层在使用了softmax进行概率的计算
-W_fc2 = tf.Variable(tf.truncated_normal([80, 2]))
+W_fc2 = tf.Variable(tf.truncated_normal([60, 2]))
 b_fc2 = tf.Variable(tf.truncated_normal([2]))
 y_conv = tf.nn.softmax(tf.matmul(h_fc1, W_fc2) + b_fc2)
 
@@ -72,7 +72,7 @@ image_batch, lable_batch = tt.get_tfrecord(200, '..//data/firstGround//train//sm
 # test capacity=2995 smile=1632 not_smile=1363
 image_batch_test, lable_batch_test = tt.get_tfrecord(2995, '..//data/firstGround//test//smile_test.tfrecords',
                                                      capacity=2995)
-sava_molel = './model/first_ground_model.ckpt'
+sava_molel = './model/second_ground_model.ckpt'
 
 
 def trian():
@@ -82,8 +82,7 @@ def trian():
         threads = tf.train.start_queue_runners(sess=sess, coord=coord)
         # 进行训练
         start_time = time.time()
-        pre_accuracy = 0.0
-        for i in range(20000):
+        for i in range(2000):
             # 取训练数据
             b_image, b_lable = sess.run([image_batch, lable_batch])
             # 训练数据

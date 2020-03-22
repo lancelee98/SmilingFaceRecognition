@@ -57,7 +57,7 @@ def CropMouth(image, left_mouth, right_mouth, offset_pct=(0.2, 0.2), dest_sz=(32
     eye_direction = (right_mouth[0] - left_mouth[0], right_mouth[1] - left_mouth[1])
     # calc rotation angle in radians  计算旋转的方向弧度。 反正切值
     rotation = -math.atan2(float(eye_direction[1]), float(eye_direction[0]))
-    # rotate original around the left eye  # 原图像绕着左眼的坐标旋转。
+    # rotate original around the left eye  # 原图像绕着左嘴的坐标旋转。
     rotated_image = ScaleRotateTranslate(image, center=left_mouth, angle=rotation)
     # calculate offsets in original image 计算在原始图像上的偏移。
     offset_h = math.floor(float(offset_pct[0]) * dest_sz[0])
@@ -144,9 +144,10 @@ def image_pre_process(image_obj, test):
     return image_obj
 
 
-# dataMat, labelMat = load_data('testing.txt')
-# for i in range(0, np.shape(dataMat)[0]):
-#     image_pre_process(dataMat[i], 1)
+def run_pre_process():
+    dataMat, labelMat = load_data('testing.txt')
+    for i in range(0, 40):
+        image_pre_process(dataMat[i], 1)
 #
 # dataMat, labelMat = load_data('training.txt')
 # for i in range(0, np.shape(dataMat)[0]):
