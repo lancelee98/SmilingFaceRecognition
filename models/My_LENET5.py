@@ -10,17 +10,7 @@ import matplotlib.pyplot as plt
 learning_rate = 0.01
 
 
-def weight_variable(shape):
-    initial = tf.truncated_normal(shape, stddev=0.1)
-    return tf.Variable(initial)
-
-
-def bias_variable(shape):
-    initial = tf.constant(0.1, shape=shape)
-    return tf.Variable(initial)
-
-
-def hidden_layer(input_tensor, resuse):
+def hidden_layer(input_tensor, resuse=tf.AUTO_REUSE):
     with tf.variable_scope("C1-conv", reuse=resuse):
         filter1 = tf.get_variable("weight", [5, 5, 1, 12],
                                   initializer=tf.truncated_normal_initializer(stddev=0.1))
@@ -61,22 +51,22 @@ def hidden_layer(input_tensor, resuse):
         Full_connection2_weights = tf.get_variable("weight", [60, 2],
                                                    initializer=tf.truncated_normal_initializer(stddev=0.1))
         Full_connection2_bias = tf.get_variable("bias", [2], initializer=tf.constant_initializer(0.0))
-        y_conv = tf.nn.softmax(tf.matmul(Full_1, Full_connection2_weights) + Full_connection2_bias)
+        y_conv = tf.nn.softmax(tf.matmul(Full_1, Full_connection2_weights) + Full_connection2_bias, name="y_conv")
     return y_conv
 
 
 x_image = tf.placeholder(tf.float32, [None, 32, 20, 1], name="x-input")  # 32*20
 y_ = tf.placeholder(tf.float32, [None, 2], name="y-input")  # 0 1 0号位置为1代表不笑 1号位置为1代表笑
 
-y_conv = hidden_layer(x_image, resuse=False)
+y_pred = hidden_layer(x_image)
 # 最后是交叉熵作为损失函数，使用梯度下降来对模型进行训练
-cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=y_conv, labels=tf.argmax(y_, 1))
+cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=y_pred, labels=tf.argmax(y_, 1))
 cross_entropy_mean = tf.reduce_mean(cross_entropy)
 loss = cross_entropy_mean
 train_step = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss)
 
 # 测试正确率
-average_y = hidden_layer(x_image, resuse=True)
+average_y = hidden_layer(x_image)
 cost = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=average_y, labels=tf.argmax(y_, 1)))
 correct_prediction = tf.equal(tf.argmax(average_y, 1), tf.argmax(y_, 1))  # 求出最大值的坐标并做对比
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
@@ -115,6 +105,7 @@ def draw_leaning_line2(iteration_time, train_accuracy, test_accuracy):
 
 def trian():
     training_cost, testing_cost, iteration_time, train_accuracy, test_accuracy = [], [], [], [], []
+    # tf.add_to_collection('y_pred',average_y)
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         coord = tf.train.Coordinator()
@@ -123,13 +114,13 @@ def trian():
         start_time = time.time()
         b_image_test, b_label_test = sess.run([image_batch_test, label_batch_test])
         b_image_total, b_label_total = sess.run([image_total, label_total])
-        for i in range(600):
+        for i in range(10):
             # 取训练数据
             b_image, b_label = sess.run([image_batch, label_batch])
             # 训练数据
             train_step.run(feed_dict={x_image: b_image, y_: b_label})
             # 每迭代10个batch,对当前训练数据进行测试，输出当前预测准确率
-            if i % 4 == 0:
+            if i % 2 == 0:
                 trian_c = cost.eval(feed_dict={x_image: b_image_total, y_: b_label_total})
                 # print("step %d, training trian_cost %g" % (i, trian_c))
                 test_c = cost.eval(feed_dict={x_image: b_image_test, y_: b_label_test})
@@ -154,7 +145,5 @@ def trian():
         coord.join(threads)
 
 
-trian()
-# import prediction
-#
-# prediction.predict()
+# trian()
+
